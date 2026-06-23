@@ -26,20 +26,23 @@ import json
 from sqlalchemy import func
 
 @app.get("/api/districts")
-def get_districts(db: Session = Depends(get_db)):
-    # Veritabanında şu an iller kayıtlı olduğu için illeri döndürüyoruz.
+def get_districts(region_type: str = "all", db: Session = Depends(get_db)):
     query = db.query(
         models.RegionModel.name,
+        models.RegionModel.region_type,
         func.ST_AsGeoJSON(models.RegionModel.geom).label('geojson')
-    ).filter(models.RegionModel.region_type == 'province')
+    )
     
+    if region_type != "all":
+        query = query.filter(models.RegionModel.region_type == region_type)
+        
     features = []
     for row in query.all():
         if row.geojson:
             features.append({
                 "type": "Feature",
                 "geometry": json.loads(row.geojson),
-                "properties": {"name": row.name}
+                "properties": {"name": row.name, "type": row.region_type}
             })
             
     return {"type": "FeatureCollection", "features": features}

@@ -116,14 +116,16 @@ document.getElementById('loadDistrictsBtn').addEventListener('click', async () =
         
         districtLayer.clearLayers();
         L.geoJSON(data, {
-            style: {
-                color: "#ff7800",
-                weight: 2,
-                opacity: 0.65,
-                fillOpacity: 0.1
+            style: function(feature) {
+                if (feature.properties.type === 'province') {
+                    return { color: "#ff7800", weight: 3, opacity: 0.8, fillOpacity: 0.1 };
+                } else {
+                    return { color: "#3388ff", weight: 1, opacity: 0.5, fillOpacity: 0.05 };
+                }
             },
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(`<b>İl: ${feature.properties.name}</b>`);
+                let title = feature.properties.type === 'province' ? 'İl' : 'İlçe';
+                layer.bindPopup(`<b>${title}: ${feature.properties.name}</b>`);
             }
         }).addTo(districtLayer);
     } catch (e) {
