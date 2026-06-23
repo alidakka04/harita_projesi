@@ -6,7 +6,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
 }).addTo(map);
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://harita-projesi.onrender.com/api';
 
 // Layers
 const poiLayers = {
