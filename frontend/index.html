@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkiye Haritası - PostGIS Destekli</title>
+    <link rel="stylesheet" href="leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Harita Katmanları</h2>
+        <div class="filter-group">
+            <label>POI Kategorisi (Okul, Hastane vb.):</label>
+            <select id="poiCategory">
+                <option value="all">Tümü</option>
+                <option value="okul">Okul</option>
+                <option value="hastane">Hastane</option>
+                <option value="cami">Cami</option>
+                <option value="pazar_yeri">Pazar Yeri</option>
+            </select>
+        </div>
+        <button id="loadPoisBtn">POI'leri Getir</button>
+        <hr style="border-color:#444; margin:20px 0;">
+        <button id="loadDistrictsBtn">İlçeleri (Poligon) Yükle</button>
+    </div>
+    
+    <div id="map"></div>
+    <div id="error-log" style="color:red; background: black; position: fixed; top: 0; left: 0; z-index: 9999; width: 100%;"></div>
+    
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            document.getElementById('error-log').innerHTML += `<p>Error: ${message} at ${source}:${lineno}:${colno}</p>`;
+        };
+    </script>
+    <script src="leaflet.js"></script>
+    <script src="map.js"></script>
+</body>
+</html>
