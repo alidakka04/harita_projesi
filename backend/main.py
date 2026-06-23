@@ -48,7 +48,7 @@ def get_districts(region_type: str = "all", db: Session = Depends(get_db)):
     return {"type": "FeatureCollection", "features": features}
 
 @app.get("/api/pois")
-def get_pois(category: str = "all", db: Session = Depends(get_db)):
+def get_pois(category: str = "all", bbox: str = None, db: Session = Depends(get_db)):
     query = db.query(
         models.POIModel.name,
         models.POIModel.poi_type,
@@ -57,6 +57,18 @@ def get_pois(category: str = "all", db: Session = Depends(get_db)):
     if category and category != "all":
         query = query.filter(models.POIModel.poi_type == category)
         
+    if bbox:
+        try:
+            # bbox is "south,west,north,east"
+            south, west, north, east = map(float, bbox.split(','))
+            # ST_MakeEnvelope uses (xmin, ymin, xmax, ymax, srid) -> (west, south, east, north, 4326)
+            bbox_geom = func.ST_MakeEnvelope(west, south, east, north, 4326)
+            query = query.filter(func.ST_Intersects(models.POIModel.geom, bbox_geom))
+        except Exception as e:
+            pass
+
+    query = query.limit(2000)
+    
     features = []
     for row in query.all():
         if row.geojson:
