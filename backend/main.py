@@ -25,13 +25,17 @@ def read_root():
 import json
 from sqlalchemy import func
 
+from sqlalchemy.orm import aliased
+
 @app.get("/api/districts")
 def get_districts(region_type: str = "all", db: Session = Depends(get_db)):
+    Parent = aliased(models.RegionModel)
     query = db.query(
         models.RegionModel.name,
         models.RegionModel.region_type,
+        Parent.name.label('province_name'),
         func.ST_AsGeoJSON(models.RegionModel.geom).label('geojson')
-    )
+    ).outerjoin(Parent, models.RegionModel.parent_id == Parent.id)
     
     if region_type != "all":
         query = query.filter(models.RegionModel.region_type == region_type)
@@ -39,10 +43,13 @@ def get_districts(region_type: str = "all", db: Session = Depends(get_db)):
     features = []
     for row in query.all():
         if row.geojson:
+            props = {"name": row.name, "type": row.region_type}
+            if row.province_name:
+                props["province_name"] = row.province_name
             features.append({
                 "type": "Feature",
                 "geometry": json.loads(row.geojson),
-                "properties": {"name": row.name, "type": row.region_type}
+                "properties": props
             })
             
     return {"type": "FeatureCollection", "features": features}
